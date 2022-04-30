@@ -1,9 +1,9 @@
-import express from 'express'
+import express, { application } from 'express'
 import cors from 'cors'
 import 'express-async-errors'
 import helmet from 'helmet'
 import fetch from 'node-fetch'
-import 'dotenv'
+import 'dotenv/config'
 
 const app = express()
 
@@ -18,11 +18,12 @@ async function teste () {
     'https://sandbox.api.pagseguro.com/oauth2/application', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer' + process.env.APP_KEY
+        Authorization: `Bearer ${process.env.MY_TOKEN}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        name: 'MAXIMUS',
-        description: 'site de canecas estilosas'
+        "name": 'MAXIMUSX',
+        "description": 'site de canecas estilosas'
       })
     }
   )
