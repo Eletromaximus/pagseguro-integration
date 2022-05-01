@@ -1,9 +1,9 @@
-import express, { application } from 'express'
+import express from 'express'
 import cors from 'cors'
 import 'express-async-errors'
 import helmet from 'helmet'
-import fetch from 'node-fetch'
 import 'dotenv/config'
+import HttpRest from './utils/HttpRest'
 
 const app = express()
 
@@ -14,7 +14,7 @@ app.use(helmet())
 app.use(cors())
 
 async function teste () {
-  await fetch(
+  const response = await HttpRest(
     'https://sandbox.api.pagseguro.com/oauth2/application', {
       method: 'POST',
       headers: {
@@ -22,16 +22,16 @@ async function teste () {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        "name": 'MAXIMUSX',
-        "description": 'site de canecas estilosas'
+        "name": 'Mdddddf',
+        "description": 'site de canecas estilosas muito locas'
       })
     }
   )
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
+
+  console.log(response)
 }
 
 app.listen(process.env.PORT || 4000, () => {
-  console.log('Bem vindo ao server'),
+  console.log('Bem vindo ao server')
   teste()
 })
