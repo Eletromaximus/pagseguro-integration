@@ -31,7 +31,14 @@ async function teste () {
   console.log(response)
 }
 
-app.listen(process.env.PORT || 4000, () => {
+const server = app.listen(process.env.PORT || 4000)
+  .on('listening', () => {
   console.log('Bem vindo ao server')
-  teste()
+  // teste()
+})
+
+process.on('SIGINT', (code) => {
+  server.close(() => {
+    console.log('fechando server', code)
+  })
 })
