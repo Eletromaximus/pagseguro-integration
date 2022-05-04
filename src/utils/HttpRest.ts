@@ -10,9 +10,9 @@ export default async function HttpRest (url: string, init?: any) {
     ...init
   })
     .then((respostaDoServer) => {
-      if (respostaDoServer.ok) {
-        return respostaDoServer.json()
-      }
+      return respostaDoServer.json()
+    })
+    .catch(() => {
       throw new Error('Falha em pegar os dados do servidor :(')
     })
 }
