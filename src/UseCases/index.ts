@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import HttpRest from "../utils/HttpRest";
+import { Request, Response } from 'express'
+import HttpRest from '../utils/HttpRest'
 
 interface IErros {
   code: number,
@@ -7,8 +7,8 @@ interface IErros {
   parameter_name: string
 }
 export class UseCases {
-  async createApp(req: Request, res: Response) {
-    const {name, description} = req.body
+  async createApp (req: Request, res: Response) {
+    const { name, description } = req.body
 
     try {
       const response = await HttpRest(
@@ -28,11 +28,11 @@ export class UseCases {
       if (response.error_messages) {
         const errors: IErros[] = response.error_messages
 
-        return res.json(errors).status(400)
+        return res.status(400).json(errors)
       }
 
       return res.send(response).status(200)
-    } catch (errors: any){
+    } catch (errors: any) {
       return res.status(500).json({
         message: errors.message || 'Unexpected error'
       })

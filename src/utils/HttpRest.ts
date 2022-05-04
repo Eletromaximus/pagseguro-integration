@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import fetch from 'node-fetch'
 
 export default async function HttpRest (url: string, init?: any) {
   return await fetch(url, {
