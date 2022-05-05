@@ -3,7 +3,9 @@ import cors from 'cors'
 import 'express-async-errors'
 import helmet from 'helmet'
 import 'dotenv/config'
-import { routers } from './routes'
+import { routes } from './routes'
+
+import './database'
 
 const app = express()
 
@@ -13,7 +15,7 @@ app.use(helmet())
 
 app.use(cors())
 
-app.use(routers)
+app.use(routes)
 
 const server = app.listen(process.env.PORT || 4000)
   .on('listening', () => {
