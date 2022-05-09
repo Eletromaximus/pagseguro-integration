@@ -5,9 +5,11 @@ export class CartsController {
   async index (req: Request, res: Response) {
     try {
       const carts = await Cart.find()
+
       return res.status(200).json(carts)
     } catch (err) {
       console.log(err)
+
       return res.status(500).json({
         error: 'Internal server error.'
       })
@@ -23,6 +25,7 @@ export class CartsController {
       return res.status(201).json(cart)
     } catch (err) {
       console.log(err)
+
       return res.status(500).json({
         error: 'Internal server error.'
       })

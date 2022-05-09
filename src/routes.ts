@@ -1,30 +1,17 @@
 import Router from 'express'
-// import { UseCases } from './UseCases'
 import { CartsController } from './controllers/CartsController'
+import { TransactionsController } from './controllers/TransactionsController'
 
-// const cases = new UseCases()
 const cartsController = new CartsController()
+const transactionsController = new TransactionsController()
 
 const routes = Router()
 
-// routes.post('/createApp', (req, res) => {
-//   return cases.createApp(req, res)
-// })
+routes.get('/carts', cartsController.index)
+routes.post('/carts', cartsController.create)
+routes.put('/carts/:id', cartsController.update)
+routes.delete('/carts/:id', cartsController.destroy)
 
-routes.get('/carts', (req, res) => {
-  return cartsController.index(req, res)
-})
-
-routes.post('/carts', (req, res) => {
-  return cartsController.create(req, res)
-})
-
-routes.put('/carts/:id', (req, res) => {
-  return cartsController.update(req, res)
-})
-
-routes.delete('/carts/:id', (req, res) => {
-  return cartsController.destroy(req, res)
-})
+routes.post('/transactions', transactionsController.create)
 
 export { routes }
