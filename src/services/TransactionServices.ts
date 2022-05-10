@@ -1,6 +1,6 @@
 import Cart from '../models/Cart'
 import Transactions from '../models/Transactions'
-
+import { randomUUID as v4 } from 'node:crypto'
 interface ITransactionsControler {
   cartCode: string,
   paymentType: string,
@@ -43,7 +43,7 @@ class TransactionsService {
 
     const transactions = await Transactions.create({
       cartCode: cart.code,
-      code: 'abc123',
+      code: v4(),
       total: cart.price,
       paymentType,
       installments,
