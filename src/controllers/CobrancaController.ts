@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import * as Yup from 'yup'
 import Cart from '../models/Cart'
 import { CobrancaServices } from '../services/CobrancaServices'
-
 export class CobrancaController {
   async create (req: Request, res: Response) {
     const {
@@ -20,7 +19,6 @@ export class CobrancaController {
       paymentMethodCardExpMonth,
       paymentMethodCardExpYear,
       paymentMethodCardSecurityCode,
-      paymentMethodCardStore,
       paymentMethodCardHolderName,
       paymentMethodTokenDataRequestorId,
       paymentMethodTokenDataWallet,
@@ -38,7 +36,15 @@ export class CobrancaController {
       paymentMethodBoletoInstructionLinesLine2,
       paymentMethodBoletoHolderName,
       paymentMethodBoletoHolderTaxId,
-      paymentMethodBoletoHolderEmail
+      paymentMethodBoletoHolderEmail,
+      paymentMethodBoletoHolderAddressStreet,
+      paymentMethodBoletoHolderAddressNumber,
+      paymentMethodBoletoHolderAddressLocality,
+      paymentMethodBoletoHolderAddressCity,
+      paymentMethodBoletoHolderAddressRegionCode,
+      paymentMethodBoletoHolderAddressRegion,
+      paymentMethodBoletoHolderAddressCountry,
+      paymentMethodBoletoHolderAddressPostalCode
     } = req.body
 
     try {
@@ -54,8 +60,8 @@ export class CobrancaController {
           .min(1)
           .when('paymentMethodType', (paymentMethodType, schema) =>
             paymentMethodType === 'CREDIT_CARD'
-              ? schema.max(12)
-              : schema.min(1)
+              ? schema.max(12).min(1).required()
+              : schema
           ),
         paymentMethodCapture: Yup.boolean().when(
           'paymentMethodType', (paymentMethodType, schema) =>
@@ -63,49 +69,28 @@ export class CobrancaController {
               ? schema.required()
               : schema
         ),
-        paymentMethodSoftDescriptor: Yup.string().when(
-          'paymentMethodType', (paymentMethodType, schema) =>
-            paymentMethodType === 'CREDIT_CARD'
-              ? schema.required()
-              : schema
-        ),
-        paymentMethodCardId: Yup.string().when(
-          'paymentMethodType', (paymentMethodType, schema) =>
-            paymentMethodType === ('CREDIT_CARD' || 'DEBIT_CARD')
-              ? schema.required()
-              : schema
-        ),
+        paymentMethodSoftDescriptor: Yup.string(),
+        paymentMethodCardId: Yup.string(),
         paymentMethodCardNumber: Yup.string().when(
           'paymentMethodType', (paymentMethodType, schema) =>
             paymentMethodType === ('CREDIT_CARD' || 'DEBIT_CARD')
               ? schema.required()
               : schema
         ),
-        paymentMethodCardNetworkToken: Yup.string().when(
+        paymentMethodCardNetworkToken: Yup.string(),
+        paymentMethodCardExpMonth: Yup.string().when(
           'paymentMethodType', (paymentMethodType, schema) =>
             paymentMethodType === ('CREDIT_CARD' || 'DEBIT_CARD')
               ? schema.required()
               : schema
         ),
-        paymentMethodCardExpMonth: Yup.number().when(
-          'paymentMethodType', (paymentMethodType, schema) =>
-            paymentMethodType === ('CREDIT_CARD' || 'DEBIT_CARD')
-              ? schema.required()
-              : schema
-        ),
-        paymentMethodCardExpYear: Yup.number().when(
+        paymentMethodCardExpYear: Yup.string().when(
           'paymentMethodType', (paymentMethodType, schema) =>
             paymentMethodType === ('CREDIT_CARD' || 'DEBIT_CARD')
               ? schema.required()
               : schema
         ),
         paymentMethodCardSecurityCode: Yup.string().when(
-          'paymentMethodType', (paymentMethodType, schema) =>
-            paymentMethodType === ('CREDIT_CARD' || 'DEBIT_CARD')
-              ? schema.required()
-              : schema
-        ),
-        paymentMethodCardStore: Yup.string().when(
           'paymentMethodType', (paymentMethodType, schema) =>
             paymentMethodType === ('CREDIT_CARD' || 'DEBIT_CARD')
               ? schema.required()
@@ -120,17 +105,10 @@ export class CobrancaController {
         paymentMethodTokenDataRequestorId: Yup.string(),
         paymentMethodTokenDataWallet: Yup.string(),
         paymentMethodTokenDataCryptogram: Yup.string().when(
-          ['paymentMethodType', 'paymentMethodCapture'], (
-            [paymentMethodType, paymentMethodCapture], schema
-          ) => {
-            if (paymentMethodType !== 'BOLETO') {
-              return paymentMethodCapture === ('VISA' || 'MASTERCARD')
-                ? schema.required()
-                : schema
-            } else {
-              return schema
-            }
-          }
+          'paymentMethodCapture', (paymentMethodCapture, schema) =>
+            paymentMethodCapture === ('VISA' || 'MASTERCARD')
+              ? schema.required()
+              : schema
         ),
         paymentMethodTokenDataEcommerceDomain: Yup.string(),
         paymentMethodTokenDataAssuranceLevel: Yup.number(),
@@ -181,6 +159,54 @@ export class CobrancaController {
             paymentMethodType === 'BOLETO'
               ? schema.required()
               : schema
+        ),
+        paymentMethodBoletoHolderAddressCity: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
+        ),
+        paymentMethodBoletoHolderAddressCountry: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
+        ),
+        paymentMethodBoletoHolderAddressLocality: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
+        ),
+        paymentMethodBoletoHolderAddressNumber: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
+        ),
+        paymentMethodBoletoHolderAddressPostalCode: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
+        ),
+        paymentMethodBoletoHolderAddressRegionCode: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
+        ),
+        paymentMethodBoletoHolderAddressRegion: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
+        ),
+        paymentMethodBoletoHolderAddressStreet: Yup.string().when('paymentMethodType',
+          (paymentMethodType, schema) =>
+            paymentMethodType === 'BOLETO'
+              ? schema.required()
+              : schema
         )
       })
 
@@ -188,14 +214,16 @@ export class CobrancaController {
         return schema
           .validate(data, { abortEarly: false })
           .catch((err: any) => {
-            const erro = err.inner.map((item: any) => {
-              return {
-                path: item.path,
-                message: item.message,
-                label: item.params.label
-              }
-            })
-            console.log(erro)
+            if (err.length > 0) {
+              const erro = err.inner.map((item: any) => {
+                return {
+                  path: item.path,
+                  message: item.message,
+                  label: item.params.label
+                }
+              })
+              console.log(erro)
+            } return err
           })
       }
 
@@ -230,13 +258,13 @@ export class CobrancaController {
           capture: paymentMethodCapture,
           soft_descriptor: paymentMethodSoftDescriptor,
           card: {
-            Id: paymentMethodCardId,
+            id: paymentMethodCardId,
             number: paymentMethodCardNumber,
             network_token: paymentMethodCardNetworkToken,
             exp_month: paymentMethodCardExpMonth,
+            store: false,
             exp_year: paymentMethodCardExpYear,
             security_code: paymentMethodCardSecurityCode,
-            store: paymentMethodCardStore,
             holder: {
               name: paymentMethodCardHolderName
             }
@@ -265,16 +293,21 @@ export class CobrancaController {
             holder: {
               name: paymentMethodBoletoHolderName,
               email: paymentMethodBoletoHolderEmail,
-              tax_id: paymentMethodBoletoHolderTaxId
+              tax_id: paymentMethodBoletoHolderTaxId,
+              address: {
+                street: paymentMethodBoletoHolderAddressStreet,
+                number: paymentMethodBoletoHolderAddressNumber,
+                locality: paymentMethodBoletoHolderAddressLocality,
+                city: paymentMethodBoletoHolderAddressCity,
+                region_code: paymentMethodBoletoHolderAddressRegionCode,
+                region: paymentMethodBoletoHolderAddressRegion,
+                country: paymentMethodBoletoHolderAddressCountry,
+                postal_code: paymentMethodBoletoHolderAddressPostalCode
+              }
             }
           }
         }
       })
-
-      // return res
-      //   .append('Content-Type', 'application/json')
-      //   .append('Authorization', `Bearer ${process.env.APP_KEY}`)
-      //   .status(200).json(response)
 
       return res.status(200).json(response)
     } catch (err) {

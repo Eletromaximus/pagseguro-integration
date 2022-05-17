@@ -1,7 +1,8 @@
 import Cobranca from '../models/Cobranca'
 import Cart from '../models/Cart'
 import { randomUUID as v4 } from 'node:crypto'
-
+import { CobrancaProvider } from '../providers/CobrancaProvider'
+import fetch from 'node-fetch'
 interface ICobrancaServices {
   cartCode: string,
   description: string,
@@ -15,7 +16,7 @@ interface ICobrancaServices {
     capture: boolean,
     soft_descriptor: string,
     card: {
-      Id: string,
+      id: string,
       number: number,
       network_token: string,
       exp_month: number,
@@ -50,13 +51,29 @@ interface ICobrancaServices {
       holder: {
         name: string,
         tax_id: string,
-        email: string
+        email: string,
+        address: {
+          street: string,
+          number: string,
+          locality: string,
+          city: string,
+          region: string,
+          region_code: string,
+          country: string,
+          postal_code: string
+        }
       }
     }
   }
 }
 
 export class CobrancaServices {
+  private cobrancaProvider: CobrancaProvider
+
+  constructor () {
+    this.cobrancaProvider = new CobrancaProvider()
+  }
+
   async process ({
     cartCode,
     amount,
@@ -69,17 +86,19 @@ export class CobrancaServices {
       throw new Error(`Cart ${cartCode} was not found`)
     }
 
+    const reference_id = v4()
+
     const cobranca = await Cobranca.create({
-      cartCode: cart.code,
-      reference_id: v4(),
+      cartCode,
+      reference_id,
       description,
-      amountValue: amount.value,
+      amountValue: cart.price,
       amountCurrency: amount.currency,
       paymentMethodType: payment_method.type,
       paymentMethodInstallments: payment_method.installments,
       paymentMethodCapture: payment_method.capture,
       paymentMethodSoftDescriptor: payment_method.soft_descriptor,
-      paymentMethodCardId: payment_method.card.Id,
+      paymentMethodCardId: payment_method.card.id,
       paymentMethodCardNumber: payment_method.card.number,
       paymentMethodCardNetworkToken: payment_method.card.network_token,
       paymentMethodCardExpMonth: payment_method.card.exp_month,
@@ -117,9 +136,35 @@ export class CobrancaServices {
       paymentMethodBoletoHolderTaxId:
         payment_method.boleto.holder.tax_id,
       paymentMethodBoletoHolderEmail:
-        payment_method.boleto.holder.email
+        payment_method.boleto.holder.email,
+      paymentMethodBoletoHolderAddress:
+        payment_method.boleto.holder.address
     })
 
+    const response = await this.cobrancaProvider.process({
+      reference_id,
+      amount,
+      payment_method,
+      description
+    })
+
+    console.log(response.payment_method)
+
+    const url = 'https://sandbox.api.pagseguro.com/charges'
+    const options = {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-type': 'application/json',
+        Authorization: String(process.env.MY_TOKEN)
+      },
+      body: JSON.stringify(response)
+    }
+    console.log(response)
+
+    await fetch(url, options)
+      .then(res => console.log(res))
+      .catch(error => console.log(error))
     return cobranca
   }
 }
